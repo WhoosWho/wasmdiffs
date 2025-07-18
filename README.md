@@ -1,259 +1,83 @@
-# American Fuzzy Lop plus plus (AFL++)
+# README
 
-<img align="right" src="https://raw.githubusercontent.com/AFLplusplus/Website/main/static/aflpp_bg.svg" alt="AFL++ logo" width="250" heigh="250">
+WasmDiff is a discrepancy detector that is based on differential fuzzing to automate the detection of discrepancy exhibited by C/C++ code porting to Wasm.
 
-Release version: [4.07c](https://github.com/AFLplusplus/AFLplusplus/releases)
+### Building WasmDiff
 
-GitHub version: 4.08a
-
-Repository:
-[https://github.com/AFLplusplus/AFLplusplus](https://github.com/AFLplusplus/AFLplusplus)
-
-AFL++ is maintained by:
-
-* Marc "van Hauser" Heuse <mh@mh-sec.de>
-* Andrea Fioraldi <andreafioraldi@gmail.com>
-* Dominik Maier <mail@dmnk.co>
-* Heiko "hexcoder-" Eißfeldt <heiko.eissfeldt@hexco.de>
-* Documentation: Jana Aydinbas <jana.aydinbas@gmail.com>
-
-Originally developed by Michał "lcamtuf" Zalewski.
-
-AFL++ is a superior fork to Google's AFL - more speed, more and better
-mutations, more and better instrumentation, custom module support, etc.
-
-You are free to copy, modify, and distribute AFL++ with attribution under the
-terms of the Apache-2.0 License. See the [LICENSE](LICENSE) for details.
-
-## Getting started
-
-Here is some information to get you started:
-
-* For an overview of the AFL++ documentation and a very helpful graphical guide,
-  please visit [docs/README.md](docs/README.md).
-* To get you started with tutorials, go to
-  [docs/tutorials.md](docs/tutorials.md).
-* For releases, see the
-  [Releases tab](https://github.com/AFLplusplus/AFLplusplus/releases) and
-  [branches](#branches). The best branches to use are, however, `stable` or
-  `dev` - depending on your risk appetite. Also take a look at the list of
-  [important changes in AFL++](docs/important_changes.md) and the list of
-  [features](docs/features.md).
-* If you want to use AFL++ for your academic work, check the
-  [papers page](https://aflplus.plus/papers/) on the website.
-* To cite our work, look at the [Cite](#cite) section.
-* For comparisons, use the fuzzbench `aflplusplus` setup, or use
-  `afl-clang-fast` with `AFL_LLVM_CMPLOG=1`. You can find the `aflplusplus`
-  default configuration on Google's
-  [fuzzbench](https://github.com/google/fuzzbench/tree/master/fuzzers/aflplusplus).
-
-## Building and installing AFL++
-
-To have AFL++ easily available with everything compiled, pull the image directly
-from the Docker Hub (available for both x86_64 and arm64):
-
-```shell
-docker pull aflplusplus/aflplusplus
-docker run -ti -v /location/of/your/target:/src aflplusplus/aflplusplus
+```bash
+git clone https://github.com/WebAssembly-Diff/WasmDiff.git
+cd WasmDiff
+make -j
+cd compilers
+./build.sh
 ```
 
-This image is automatically published when a push to the stable branch happens
-(see [branches](#branches)). If you use the command above, you will find your
-target source code in `/src` in the container.
+### Instrumenting WasmEdge
 
-Note: you can also pull `aflplusplus/aflplusplus:dev` which is the most current
-development state of AFL++.
+```bash
+git clone https://github.com/WasmEdge/WasmEdge.git
+cd WasmEdge
+export LLVM_DIR=${LLVM-LIB}/lib
+export LLD_DIR=${LLVM-LIB}/lib/cmake/lld
+#Specify the compiler
+cmake -DCMAKE_C_COMPILER_AR=${AR_PATH} -DCMAKE_C_COMPILER_RANLIB=${RANLIB_PATH} -DCMAKE_C_COMPILER=/WasmDiff/compilers/diff-cc-1 -DCMAKE_CXX_COMPILER=/WasmDiff/compilers/diff-cxx-1 -DCMAKE_BUILD_TYPE=Release -DWASMEDGE_BUILD_TESTS=ON ..
+#Build
+make -j
+#Export
+export AFL_WASM_RUNTIME=`pwd`/WasmEdge/build/tools/wasmedge/wasmedge
+```
 
-To build AFL++ yourself - *which we recommend* - continue at
-[docs/INSTALL.md](docs/INSTALL.md).
+### Compiling C/C++ single file
 
-## Quick start: Fuzzing with AFL++
+```bash
+/WasmDiff/afl-clang -O2 target.c -o target
+/WasmDiff/compiler/diff-cc-0 -02 target.c -o target-0
+emcc -s STANDALONE_WASM target.c -02 -o target.wasm
+```
 
-*NOTE: Before you start, please read about the
-[common sense risks of fuzzing](docs/fuzzing_in_depth.md#0-common-sense-risks).*
+### Compiling the project (Libitff as an example)
 
-This is a quick start for fuzzing targets with the source code available. To
-read about the process in detail, see
-[docs/fuzzing_in_depth.md](docs/fuzzing_in_depth.md).
+```bash
+wget https://download.osgeo.org/libtiff/tiff-4.6.0.tar.gz
+./autogen.sh
+# patch the config.sub
+grep -q -F -- '-wasi' ./config/config.sub ||   sed -i -e 's/-nacl\*)/-nacl*|-wasi)/' ./config/config.sub
+#AFL-instrument
+/WasmDiff/afl-clang ./configure --enable-shared=no CFLAGS="-O2"
+make clean && make -j && make check
+#WasmDiff-forkserver-instrument
+GCC_PATH=/usr/bin && CC=$GCC_PATH/clang CXX=$GCC_PATH/clang++ ./configure --enable-shared=no CFLAGS="-O0 -g" && make -j && make check
+# target:tiff2pdf-0
+/WasmDiff/compilers/diff-cc-0 -DHAVE_CONFIG_H -I. -I../../config -I../../libtiff -I../../port  -I../../libtiff -I../../port -g -Wall -W -MT tiff2pdf.o -MD -MP -MF .deps/tiff2pdf.Tpo -c -o tiff2pdf.o tiff2pdf.c
+mv -f .deps/tiff2pdf.Tpo .deps/tiff2pdf.Po
+/WasmDiff/compilers/diff-cc-0 -g -Wall -W -o tiff2pdf-0 tiff2pdf.o  ../../libtiff/.libs/libtiff.a ../../port/.libs/libport.a /usr/lib/x86_64-linux-gnu/libjpeg.so -lz -lm
+#Wasm
+WASI_PATH=${WASI_SDK_PATH}/bin \
+CC=$WASI_PATH/clang \
+CXX=$WASI_PATH/clang++ \
+CPP=$WASI_PATH/clang-cpp \
+AR=$WASI_PATH/llvm-ar \
+RANLIB=$WASI_PATH/llvm-ranlib \
+NM=$WASI_PATH/llvm-nm \
+LD=$WASI_PATH/wasm-ld \
+./configure --with-oniguruma=builtin --host=wasm32-wasi --enable-shared=no CFLAGS="--sysroot=/opt/wasi-sdk-20.0/share/wasi-sysroot -D_WASI_EMULATED_PROCESS_CLOCKS -D_WASI_EMULATED_SIGNAL -O0 -g" LDFLAGS="-lwasi-emulated-process-clocks -lwasi-emulated-signal"
+make clean && make && make check
+```
 
-To learn about fuzzing other targets, see:
-* Binary-only targets:
-  [docs/fuzzing_binary-only_targets.md](docs/fuzzing_binary-only_targets.md)
-* Network services:
-  [docs/best_practices.md#fuzzing-a-network-service](docs/best_practices.md#fuzzing-a-network-service)
-* GUI programs:
-  [docs/best_practices.md#fuzzing-a-gui-program](docs/best_practices.md#fuzzing-a-gui-program)
+#### If CMake required:
 
-Step-by-step quick start:
+```bash
+$ cmake -DCMAKE_TOOLCHAIN_FILE=${WASI_SDK_PATH}/share/cmake/wasi-sdk.cmake ...
+```
 
-1. Compile the program or library to be fuzzed using `afl-cc`. A common way to
-   do this would be:
+### Fuzzing
 
-   ```
-   CC=/path/to/afl-cc CXX=/path/to/afl-c++ ./configure --disable-shared
-   make clean all
-   ```
+```bash
+sudo /WasmDiff/afl-sysconfig
+# Standard output
+/WasmDiff/afl-fuzz -i in -o out .. ./target @@
+# File output
+/WasmDiff/afl-fuzz -i in -o out -J 'test.file' .. ./target @@ test.file
+```
 
-2. Get a small but valid input file that makes sense to the program. When
-   fuzzing verbose syntax (SQL, HTTP, etc.), create a dictionary as described in
-   [dictionaries/README.md](dictionaries/README.md), too.
-
-3. If the program reads from stdin, run `afl-fuzz` like so:
-
-   ```
-   ./afl-fuzz -i seeds_dir -o output_dir -- \
-   /path/to/tested/program [...program's cmdline...]
-   ```
-
-   To add a dictionary, add `-x /path/to/dictionary.txt` to afl-fuzz.
-
-   If the program takes input from a file, you can put `@@` in the program's
-   command line; AFL++ will put an auto-generated file name in there for you.
-
-4. Investigate anything shown in red in the fuzzer UI by promptly consulting
-   [docs/afl-fuzz_approach.md#understanding-the-status-screen](docs/afl-fuzz_approach.md#understanding-the-status-screen).
-
-5. You will find found crashes and hangs in the subdirectories `crashes/` and
-   `hangs/` in the `-o output_dir` directory. You can replay the crashes by
-   feeding them to the target, e.g. if your target is using stdin:
-
-   ```
-   cat output_dir/crashes/id:000000,* | /path/to/tested/program [...program's cmdline...]
-   ```
-
-   You can generate cores or use gdb directly to follow up the crashes.
-
-6. We cannot stress this enough - if you want to fuzz effectively, read the
-   [docs/fuzzing_in_depth.md](docs/fuzzing_in_depth.md) document!
-
-## Contact
-
-Questions? Concerns? Bug reports?
-
-* The contributors can be reached via (e.g., by creating an issue):
-  [https://github.com/AFLplusplus/AFLplusplus](https://github.com/AFLplusplus/AFLplusplus).
-* Take a look at our [FAQ](docs/FAQ.md). If you find an interesting or important
-  question missing, submit it via
-  [https://github.com/AFLplusplus/AFLplusplus/discussions](https://github.com/AFLplusplus/AFLplusplus/discussions).
-* Best: join the [Awesome Fuzzing](https://discord.gg/gCraWct) Discord server.
-* There is a (not really used) mailing list for the AFL/AFL++ project
-  ([browse archive](https://groups.google.com/group/afl-users)). To compare
-  notes with other users or to get notified about major new features, send an
-  email to <afl-users+subscribe@googlegroups.com>, but note that this is not
-  managed by us.
-
-## Branches
-
-The following branches exist:
-
-* [release](https://github.com/AFLplusplus/AFLplusplus/tree/release): the latest
-  release
-* [stable/trunk](https://github.com/AFLplusplus/AFLplusplus/): stable state of
-  AFL++ - it is synced from dev from time to time when we are satisfied with its
-  stability
-* [dev](https://github.com/AFLplusplus/AFLplusplus/tree/dev): development state
-  of AFL++ - bleeding edge and you might catch a checkout which does not compile
-  or has a bug. **We only accept PRs (pull requests) for the 'dev' branch!**
-* (any other): experimental branches to work on specific features or testing new
-  functionality or changes.
-
-## Help wanted
-
-We have several [ideas](docs/ideas.md) we would like to see in AFL++ to make it
-even better. However, we already work on so many things that we do not have the
-time for all the big ideas.
-
-This can be your way to support and contribute to AFL++ - extend it to do
-something cool.
-
-For everyone who wants to contribute (and send pull requests), please read our
-[contributing guidelines](CONTRIBUTING.md) before you submit.
-
-## Special thanks
-
-Many of the improvements to the original AFL and AFL++ wouldn't be possible
-without feedback, bug reports, or patches from our contributors.
-
-Thank you! (For people sending pull requests - please add yourself to this list
-:-)
-
-<details>
-
-  <summary>List of contributors</summary>
-
-  ```
-    Jann Horn                             Hanno Boeck
-    Felix Groebert                        Jakub Wilk
-    Richard W. M. Jones                   Alexander Cherepanov
-    Tom Ritter                            Hovik Manucharyan
-    Sebastian Roschke                     Eberhard Mattes
-    Padraig Brady                         Ben Laurie
-    @dronesec                             Luca Barbato
-    Tobias Ospelt                         Thomas Jarosch
-    Martin Carpenter                      Mudge Zatko
-    Joe Zbiciak                           Ryan Govostes
-    Michael Rash                          William Robinet
-    Jonathan Gray                         Filipe Cabecinhas
-    Nico Weber                            Jodie Cunningham
-    Andrew Griffiths                      Parker Thompson
-    Jonathan Neuschaefer                  Tyler Nighswander
-    Ben Nagy                              Samir Aguiar
-    Aidan Thornton                        Aleksandar Nikolich
-    Sam Hakim                             Laszlo Szekeres
-    David A. Wheeler                      Turo Lamminen
-    Andreas Stieger                       Richard Godbee
-    Louis Dassy                           teor2345
-    Alex Moneger                          Dmitry Vyukov
-    Keegan McAllister                     Kostya Serebryany
-    Richo Healey                          Martijn Bogaard
-    rc0r                                  Jonathan Foote
-    Christian Holler                      Dominique Pelle
-    Jacek Wielemborek                     Leo Barnes
-    Jeremy Barnes                         Jeff Trull
-    Guillaume Endignoux                   ilovezfs
-    Daniel Godas-Lopez                    Franjo Ivancic
-    Austin Seipp                          Daniel Komaromy
-    Daniel Binderman                      Jonathan Metzman
-    Vegard Nossum                         Jan Kneschke
-    Kurt Roeckx                           Marcel Boehme
-    Van-Thuan Pham                        Abhik Roychoudhury
-    Joshua J. Drake                       Toby Hutton
-    Rene Freingruber                      Sergey Davidoff
-    Sami Liedes                           Craig Young
-    Andrzej Jackowski                     Daniel Hodson
-    Nathan Voss                           Dominik Maier
-    Andrea Biondo                         Vincent Le Garrec
-    Khaled Yakdan                         Kuang-che Wu
-    Josephine Calliotte                   Konrad Welc
-    Thomas Rooijakkers                    David Carlier
-    Ruben ten Hove                        Joey Jiao
-    fuzzah                                @intrigus-lgtm
-    Yaakov Saxon
-  ```
-
-</details>
-
-## Cite
-
-If you use AFL++ in scientific work, consider citing
-[our paper](https://www.usenix.org/conference/woot20/presentation/fioraldi)
-presented at WOOT'20:
-
-    Andrea Fioraldi, Dominik Maier, Heiko Eißfeldt, and Marc Heuse. “AFL++: Combining incremental steps of fuzzing research”. In 14th USENIX Workshop on Offensive Technologies (WOOT 20). USENIX Association, Aug. 2020.
-
-<details>
-
-<summary>BibTeX</summary>
-
-  ```bibtex
-  @inproceedings {AFLplusplus-Woot20,
-  author = {Andrea Fioraldi and Dominik Maier and Heiko Ei{\ss}feldt and Marc Heuse},
-  title = {{AFL++}: Combining Incremental Steps of Fuzzing Research},
-  booktitle = {14th {USENIX} Workshop on Offensive Technologies ({WOOT} 20)},
-  year = {2020},
-  publisher = {{USENIX} Association},
-  month = aug,
-  }
-  ```
-
-</details>
+The fuzzing results is under `out/default/diff/`.
