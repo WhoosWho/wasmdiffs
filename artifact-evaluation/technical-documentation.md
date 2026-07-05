@@ -310,3 +310,31 @@ AFL_NO_UI=1 AFL_SKIP_CPUFREQ=1 timeout 20s /usr/local/bin/afl-fuzz -i in -o out 
 If the automated workflow succeeds, the next goal is to verify whether discrepancies are stored in the expected output directory and whether the controlled discrepancy can be detected automatically.
 
 Only after this reproduction step should project extensions be implemented.
+
+## 14. Attempt to Build Instrumented WasmEdge
+
+After the automated AFL++/WasmDiff workflow failed with Wasmtime, I attempted to follow the repository documentation and build the WebAssembly runtime expected by the artifact.
+
+The README expects an instrumented WasmEdge build using compiler wrappers located under:
+
+/WasmDiff/compilers/diff-cc-1
+/WasmDiff/compilers/diff-cxx-1
+
+However, these compiler wrappers were not present in the current repository checkout or in the Docker container.
+
+The following checks were performed:
+
+- searching for `diff-cc-1` and `diff-cxx-1` under `/work`
+- searching for `diff-cc-1` and `diff-cxx-1` under `/AFLplusplus`
+- checking available Git branches and tags
+- inspecting the Git tree for `compilers`, `diff-cc`, and `diff-cxx`
+
+No matching compiler wrappers were found.
+
+The repository only contained references to these files in the README, but not the actual files required to build WasmEdge according to the documented instructions.
+
+Interpretation:
+
+Building the instrumented WasmEdge runtime according to the README is currently blocked because the required WasmDiff compiler wrappers are missing from the available repository checkout.
+
+As a result, the automated AFL++/WasmDiff workflow cannot yet be reproduced exactly as documented. The next step would be to locate the missing compiler wrapper scripts, obtain a complete artifact package, or reconstruct the wrappers based on the intended native/Wasm compilation workflow.
