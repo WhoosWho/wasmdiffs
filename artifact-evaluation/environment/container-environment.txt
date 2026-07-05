@@ -1,0 +1,43 @@
+=== Container date ===
+Sun Jul  5 13:36:52 UTC 2026
+
+=== Container system ===
+Linux 96a73023dd50 6.4.16-linuxkit #1 SMP PREEMPT_DYNAMIC Tue Oct 10 20:42:40 UTC 2023 x86_64 x86_64 x86_64 GNU/Linux
+
+=== GCC ===
+gcc (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0
+Copyright (C) 2021 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+
+=== Clang ===
+Ubuntu clang version 14.0.6
+Target: x86_64-pc-linux-gnu
+Thread model: posix
+InstalledDir: /usr/bin
+
+=== AFL++ ===
+[1;92m[+] [0mEnabled environment variable AFL_SKIP_CPUFREQ with value 1[0m
+[1;92m[+] [0mEnabled environment variable AFL_I_DONT_CARE_ABOUT_MISSING_CRASHES with value 1[0m
+[1;92m[+] [0mEnabled environment variable AFL_TRY_AFFINITY with value 1[0m
+[0;36mafl-fuzz++4.08a[0m based on afl by Michal Zalewski and a large online community
+
+afl-fuzz [ options ] -- /path/to/fuzzed_app [ ... ]
+
+Required parameters:
+  -i dir        - input directory with test cases (or '-' to resume, also see 
+                  AFL_AUTORESUME)
+  -o dir        - output directory for fuzzer findings
+
+Execution control settings:
+  -P strategy   - set fix mutation strategy: explore (focus on new coverage),
+                  exploit (focus on triggering crashes). You can also set a
+                  number of seconds after without any finds it switches to
+                  exploit mode, and back on new coverage (default: 1000)
+  -p schedule   - power schedules compute a seed's performance score:
+                  fast(default), explore, exploit, seek, rare, mmopt, coe, lin
+                  quad -- see docs/FAQ.md for more information
+
+=== Wasmtime ===
+wasmtime 46.0.1 (823d1b8f2 2026-06-24)

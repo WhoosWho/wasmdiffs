@@ -1,0 +1,22 @@
+Test ID: test-06-controlled-discrepancy
+Input: 01234567
+Native binary: test-0
+Wasm binary: test.wasm
+Native exit: 0
+Wasm exit: 0
+
+Native output:
+I'm x86 one!
+
+Wasm output:
+I'm wasm one!
+
+Diff:
+--- native-discrepant.out	2026-07-05 16:23:55.463322956 +0000
++++ wasm-discrepant.out	2026-07-05 16:23:55.495050620 +0000
+@@ -1 +1 @@
+-I'm x86 one!
++I'm wasm one!
+
+Interpretation:
+A controlled Native-to-Wasm discrepancy was observed. The native variant test-0 produced a different output from the WebAssembly binary for the same input.

@@ -1,0 +1,15 @@
+Test ID: test-01-starts-with-zero
+Input: 01234567
+Native exit: 0
+Wasm exit: 0
+
+Native output:
+I'm wasm one!
+
+Wasm output:
+I'm wasm one!
+
+Diff:
+
+Interpretation:
+No discrepancy observed. Native and Wasm produced the same output and exit code.

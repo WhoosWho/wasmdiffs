@@ -1,0 +1,5 @@
+--- native-discrepant.out	2026-07-05 16:23:55.463322956 +0000
++++ wasm-discrepant.out	2026-07-05 16:23:55.495050620 +0000
+@@ -1 +1 @@
+-I'm x86 one!
++I'm wasm one!

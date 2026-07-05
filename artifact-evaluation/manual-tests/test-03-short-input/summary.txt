@@ -1,0 +1,15 @@
+Test ID: test-03-short-input
+Input: 123
+Native exit: 1
+Wasm exit: 1
+
+Native output:
+error!
+
+Wasm output:
+error!
+
+Diff:
+
+Interpretation:
+No discrepancy observed. Native and Wasm produced the same error output and exit code.

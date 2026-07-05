@@ -1,0 +1,15 @@
+Test ID: test-04-special-characters
+Input: !@#$%^&*
+Native exit: 0
+Wasm exit: 0
+
+Native output:
+A non-zero value? How quaint!
+
+Wasm output:
+A non-zero value? How quaint!
+
+Diff:
+
+Interpretation:
+No discrepancy observed. Native and Wasm produced the same output and exit code.
