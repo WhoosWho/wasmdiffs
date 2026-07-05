@@ -1,0 +1,19 @@
+Attempt ID: attempt-01-wasmtime
+Runtime: Wasmtime
+AFL_WASM_RUNTIME=/root/.wasmtime/bin/wasmtime
+
+Command:
+AFL_NO_UI=1 AFL_SKIP_CPUFREQ=1 timeout 20s /usr/local/bin/afl-fuzz -i in -o out -J 'test.file' -- ./test @@ test.file
+
+Observed result:
+The fuzzer started, loaded the seed input, created the output directory, and started the main forkserver and diff_0 forkserver.
+
+Failure:
+The second differential forkserver diff_1 failed during initialization.
+
+Error:
+PROGRAM ABORT : Fork server handshake failed
+Location : afl_fsrv_start_diff(), src/diff-afl-forkserver.c:847
+
+Interpretation:
+The WasmDiff-specific AFL_WASM_RUNTIME variable was recognized, but Wasmtime did not work as the required WebAssembly runtime for the AFL++ differential forkserver setup. The repository documentation expects an instrumented WasmEdge runtime, so this attempt is considered a partial reproduction of the automated workflow.
