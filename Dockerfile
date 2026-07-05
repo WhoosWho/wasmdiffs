@@ -40,7 +40,7 @@ RUN apt-get update && \
     make cmake automake meson ninja-build bison flex \
     git xz-utils bzip2 wget jupp nano bash-completion less vim joe ssh psmisc \
     python3 python3-dev python3-pip python-is-python3 \
-    libtool libtool-bin libglib2.0-dev \
+    libtool libtool-bin libglib2.0-dev libssl-dev \
     apt-transport-https gnupg dialog \
     gnuplot-nox libpixman-1-dev bc \
     gcc-${GCC_VERSION} g++-${GCC_VERSION} gcc-${GCC_VERSION}-plugin-dev gdb lcov \
@@ -87,7 +87,7 @@ ARG CXX=g++-$GCC_VERSION
 ARG TEST_BUILD
 
 RUN sed -i.bak 's/^	-/	/g' GNUmakefile && \
-    make clean && make distrib && \
+    make clean && make all && \
     ([ "${TEST_BUILD}" ] || (make install && make clean)) && \
     mv GNUmakefile.bak GNUmakefile
 
