@@ -2236,9 +2236,9 @@ int main(int argc, char **argv_orig, char **envp) {
         //wasm_argv[0] = alloc_printf("%s",wavm_path);
 
         // 注意这里argv的结尾一定要为NULL,否则后续的execv就会报错signal 15
-        wasm_argv[len_wasm_argv + 4] = NULL;
-        for (int i = len_wasm_argv + 3; i - 3 > 0; i--) {
-          wasm_argv[i] = alloc_printf("%s", wasm_argv[i-4]);
+        wasm_argv[len_wasm_argv + 3] = NULL;
+        for (int i = len_wasm_argv + 2; i - 2 > 0; i--) {
+          wasm_argv[i] = alloc_printf("%s", wasm_argv[i-3]);
         }
         // espically for wasmedge
         // used for mapping the dir 
@@ -2246,8 +2246,7 @@ int main(int argc, char **argv_orig, char **envp) {
         char* cur_dir;
         cur_dir = get_current_dir_name();
         wasm_argv[2] = alloc_printf("%s",cur_dir);
-        wasm_argv[3] = alloc_printf("run");
-        wasm_argv[4] = alloc_printf("%s.wasm", wasm_argv[0]);
+        wasm_argv[3] = alloc_printf("%s.wasm", wasm_argv[0]);
         // get the wasm runtime path
         char *wavm_path = getenv("AFL_WASM_RUNTIME");
         if (!wavm_path) {

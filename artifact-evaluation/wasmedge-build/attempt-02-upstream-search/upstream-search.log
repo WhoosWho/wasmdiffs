@@ -1,0 +1,17 @@
+=== available upstream ===
+origin	git@github.com:WhoosWho/wasmdiffs.git (fetch)
+origin	git@github.com:WhoosWho/wasmdiffs.git (push)
+upstream	https://github.com/WebAssembly-Diff/wasmdiffs.git (fetch)
+upstream	https://github.com/WebAssembly-Diff/wasmdiffs.git (push)
+
+=== upstream branches ===
+* main
+  remotes/origin/HEAD -> origin/main
+  remotes/origin/main
+  remotes/upstream/main
+
+=== search available upstream/main for compiler wrappers ===
+
+=== README referenced repository check ===
+remote: Invalid username or token. Password authentication is not supported for Git operations.
+fatal: Authentication failed for 'https://github.com/WebAssembly-Diff/WasmDiff.git/'

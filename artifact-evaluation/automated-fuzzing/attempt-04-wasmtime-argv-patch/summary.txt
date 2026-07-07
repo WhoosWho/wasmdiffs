@@ -1,0 +1,25 @@
+Attempt ID: attempt-04-wasmtime-argv-patch
+
+Goal:
+Patch the Wasmtime argv construction by removing the incorrect 'run' argument.
+
+Observed corrected diff_1 argv:
+[WasmDiff DEBUG] idx_diff=1 before init_child_func
+[WasmDiff DEBUG] argv[0]=/root/.wasmtime/bin/wasmtime
+[WasmDiff DEBUG] argv[1]=--dir
+[WasmDiff DEBUG] argv[2]=/work/compdiff_file_test
+[WasmDiff DEBUG] argv[3]=./test.wasm
+[WasmDiff DEBUG] argv[4]=/work/compdiff_file_test/out/default/.cur_input
+[WasmDiff DEBUG] argv[5]=test.file
+
+Manual Wasmtime validation:
+/root/.wasmtime/bin/wasmtime --dir /work/compdiff_file_test ./test.wasm /work/compdiff_file_test/manual_input.txt /work/compdiff_file_test/test.file
+
+Result:
+Manual Wasmtime execution succeeds with exit code 0 and writes: I'm wasm one!
+
+Remaining issue:
+The AFL++/WasmDiff automated run still fails with Fork server handshake failed.
+
+Interpretation:
+The Wasmtime invocation is now valid, but normal Wasmtime does not provide the forkserver handshake expected by afl_fsrv_start_diff().
