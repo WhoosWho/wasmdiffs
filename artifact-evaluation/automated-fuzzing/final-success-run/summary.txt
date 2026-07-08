@@ -1,0 +1,22 @@
+Final success run
+
+This run demonstrates the stabilized Way B prototype.
+
+Configuration:
+- Native target: ./test
+- Wasm module: /work/compdiff_file_test/test.wasm
+- Wasm runtime: Wasmtime via AFL_WASM_RUNTIME
+- Wasm module path: AFL_WASM_MODULE
+
+Result:
+AFL++ starts successfully, the native side uses the AFL++ forkserver, and the Wasm side is executed through normal Wasmtime invocation. The prototype enters the fuzzing loop, discovers discrepancy inputs, stores them under out/default/diffs, and exits cleanly under the timeout wrapper.
+
+The timeout exit code 124 is expected because the run is intentionally bounded with timeout 15s.
+
+Observed evidence:
+- diff_1 forkserver startup is skipped
+- AFL++ reaches "All set and ready to roll"
+- AFL++ enters queue cycle 1
+- discrepancy inputs are stored under out/default/diffs
+- no forkserver handshake failure occurs
+- no double-free cleanup crash occurs

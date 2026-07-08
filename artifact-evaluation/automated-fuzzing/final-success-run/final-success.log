@@ -1,0 +1,58 @@
+[1;93m[!] [1;97mWARNING: [0mMistyped AFL environment variable: AFL_WASM_MODULE=/work/compdiff_file_test/test.wasm[0m
+Did you mean AFL_AS?
+[1;93m[!] [1;97mWARNING: [0mMistyped AFL environment variable: AFL_WASM_RUNTIME=/root/.wasmtime/bin/wasmtime[0m
+Did you mean AFL_AS?
+[1;92m[+] [0mEnabled environment variable AFL_SKIP_CPUFREQ with value 1[0m
+[1;92m[+] [0mEnabled environment variable AFL_NO_UI with value 1[0m
+[1;92m[+] [0mEnabled environment variable AFL_I_DONT_CARE_ABOUT_MISSING_CRASHES with value 1[0m
+[1;92m[+] [0mEnabled environment variable AFL_TRY_AFFINITY with value 1[0m
+[0;36mafl-fuzz++4.08a[0m based on afl by Michal Zalewski and a large online community
+[1;92m[+] [0mAFL++ is maintained by Marc "van Hauser" Heuse, Dominik Maier, Andrea Fioraldi and Heiko "hexcoder" Eißfeldt[0m
+[1;92m[+] [0mAFL++ is open source, get it at https://github.com/AFLplusplus/AFLplusplus[0m
+[1;92m[+] [0mNOTE: AFL++ >= v3 has changed defaults and behaviours - see README.md[0m
+[1;92m[+] [0mNo -M/-S set, autoconfiguring for "-S default"[0m
+[1;94m[*] [0mGetting to work...[0m
+[1;92m[+] [0mUsing exponential power schedule (FAST)[0m
+[1;92m[+] [0mEnabled testcache with 50 MB[0m
+[1;92m[+] [0mGenerating fuzz data with a length of min=1 max=1048576[0m
+[1;94m[*] [0mChecking core_pattern...[0m
+[1;92m[+] [0mDisabling the UI because AFL_NO_UI is set.[0m
+[1;92m[+] [0mYou have 4 CPU cores and 1 runnable tasks (utilization: 25%).[0m
+[1;92m[+] [0mTry parallel jobs - see /usr/local/share/doc/afl/fuzzing_in_depth.md#c-using-multiple-cores[0m
+[1;94m[*] [0mSetting up output directories...[0m
+[1;94m[*] [0mChecking CPU core loadout...[0m
+[1;92m[+] [0mFound a free CPU core, try binding to #0.[0m
+[1;94m[*] [0mScanning 'in'...[0m
+[1;92m[+] [0mLoaded a total of 1 seeds.[0m
+[1;94m[*] [0mCreating hard links for all input files...[0m
+[1;92m[+] [0mUsing output...test.file[0m
+[1;94m[*] [0mValidating target binary...[0m
+[1;92m[+] [0mSuccessfully get the Webassembly runtime:/root/.wasmtime/bin/wasmtime[0m
+[1;94m[*] [0mSpinning up the fork server...[0m
+[1;92m[+] [0mAll right - fork server is up.[0m
+[1;94m[*] [0mSpinning up the fork server...diff_0[0m
+[1;92m[+] [0mAll right - fork server is up.[0m
+[1;92m[+] [0mSkipping forkserver startup for diff_1 Wasmtime prototype[0m
+[1;94m[*] [0mNo auto-generated dictionary tokens to reuse.[0m
+[1;94m[*] [0mAttempting dry run with 'id:000000,time:0,execs:0,orig:seed'...[0m
+[1;90m    len = 8, map size = 11, exec speed = 53583 us, hash = d98de4499d8de65d
+[0m[1;92m[+] [0mAll test cases processed.[0m
+[1;93m[!] [1;97mWARNING: [0m[1;91mThe target binary is pretty slow! See /usr/local/share/doc/afl/fuzzing_in_depth.md#i-improve-the-speed[0m
+[1;92m[+] [0mHere are some useful stats:
+
+[1;90m    Test case count : [0m1 favored, 0 variable, 0 ignored, 1 total
+[1;90m       Bitmap range : [0m11 to 11 bits (average: 11.00 bits)
+[1;90m        Exec timing : [0m53.6k to 53.6k us (average: 53.6k us)
+[0m
+[1;94m[*] [0mNo -t option specified, so I'll use an exec timeout of 120 ms.[0m
+[1;92m[+] [0mAll set and ready to roll![0m
+[1;94m[*] [0mEntering queue cycle 1.[0m
+[1;94m[*] [0mFuzzing test case #0 (1 total, 0 crashes saved, state: started :-), mode=explore, perf_score=100, weight=20, favorite=1, was_fuzzed=0, exec_us=53583, hits=0, map=11, ascii=0, run_time=0:00:00:00)...[0m
+afl_exit=124
+out/default/diffs/id:000000,sig:00,src:000000,time:622,execs:9,op:havoc,rep:1
+out/default/diffs/id:000001,sig:00,src:000000,time:1570,execs:19,op:havoc,rep:3
+out/default/diffs/id:000002,sig:00,src:000000,time:2617,execs:29,op:havoc,rep:4
+out/default/diffs/id:000003,sig:00,src:000000,time:3170,execs:37,op:havoc,rep:7
+out/default/diffs/id:000004,sig:00,src:000000,time:5213,execs:50,op:havoc,rep:7
+out/default/diffs/id:000005,sig:00,src:000000,time:9408,execs:82,op:havoc,rep:6
+out/default/diffs/id:000006,sig:00,src:000000,time:12220,execs:104,op:havoc,rep:5
