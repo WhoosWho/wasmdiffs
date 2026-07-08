@@ -357,3 +357,37 @@ This confirms that the prototype can discover observable Native-to-Wasm discrepa
 This prototype is slower than the original intended design because Wasmtime is started normally for the Wasm side instead of using a persistent forkserver. It is currently tailored to the `compdiff_file_test` example and should be generalized before being used for larger projects.
 
 Nevertheless, it demonstrates a practical fallback strategy when the original instrumented Wasm runtime is unavailable.
+
+## 16. Configurable Wasm Module Path
+
+After the initial Way B prototype worked with the `compdiff_file_test` example, I generalized the Wasm module selection slightly. Instead of always using a hardcoded `test.wasm` path, the prototype can now read the Wasm module path from the environment variable:
+
+```text
+AFL_WASM_MODULE
+```
+
+The Wasm runtime is still selected through:
+
+```text
+AFL_WASM_RUNTIME
+```
+
+A successful test command was:
+
+```bash
+AFL_WASM_RUNTIME="$(which wasmtime)" \
+AFL_WASM_MODULE=/work/compdiff_file_test/test.wasm \
+AFL_NO_UI=1 \
+AFL_SKIP_CPUFREQ=1 \
+timeout 15s /work/afl-fuzz \
+  -i in \
+  -o out \
+  -J 'test.file' \
+  -- ./test @@ test.file
+```
+
+The run successfully entered the AFL++ fuzzing loop, skipped the forkserver startup for `diff_1`, found new corpus items, and exited cleanly under the timeout wrapper.
+
+AFL++ prints warnings for `AFL_WASM_RUNTIME` and `AFL_WASM_MODULE` because they are not standard AFL++ environment variables. However, the WasmDiff prototype reads them successfully.
+
+This makes the prototype less dependent on the fixed `test.wasm` filename and prepares it for additional Native/Wasm target pairs.
