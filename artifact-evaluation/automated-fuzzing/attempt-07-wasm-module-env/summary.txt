@@ -1,0 +1,21 @@
+Attempt ID: attempt-07-wasm-module-env
+
+Goal:
+Generalize the Way B prototype by allowing the Wasm module path to be configured with AFL_WASM_MODULE instead of hardcoding test.wasm.
+
+Command:
+AFL_WASM_RUNTIME="$(which wasmtime)" \
+AFL_WASM_MODULE=/work/compdiff_file_test/test.wasm \
+AFL_NO_UI=1 \
+AFL_SKIP_CPUFREQ=1 \
+timeout 15s /work/afl-fuzz \
+  -i in \
+  -o out \
+  -J 'test.file' \
+  -- ./test @@ test.file
+
+Result:
+The fuzzer successfully started, skipped forkserver startup for diff_1, entered the fuzzing loop, found new corpus items, and exited cleanly under timeout.
+
+Notes:
+AFL++ prints warnings about AFL_WASM_RUNTIME and AFL_WASM_MODULE being mistyped environment variables because they are not standard AFL++ variables. However, the WasmDiff prototype reads them successfully.

@@ -931,9 +931,17 @@ u8 differential_compilers(afl_state_t *afl, void *mem, u32 len) {
       unlink(stdout_path);
       unlink(stderr_path);
 
+      char wasm_module[PATH_MAX];
+      char *wasm_module_env = getenv("AFL_WASM_MODULE");
+      if (wasm_module_env) {
+        snprintf(wasm_module, PATH_MAX, "%s", wasm_module_env);
+      } else {
+        snprintf(wasm_module, PATH_MAX, "%s/test.wasm", cwd);
+      }
+
       snprintf(cmd, sizeof(cmd),
-               "\"%s\" --dir \"%s\" \"%s/test.wasm\" \"%s\" \"%s\" > \"%s\" 2> \"%s\"",
-               getenv("AFL_WASM_RUNTIME"), cwd, cwd, input_path, output_path,
+               "\"%s\" --dir \"%s\" \"%s\" \"%s\" \"%s\" > \"%s\" 2> \"%s\"",
+               getenv("AFL_WASM_RUNTIME"), cwd, wasm_module, input_path, output_path,
                stdout_path, stderr_path);
 
       int wasm_rc = system(cmd);
