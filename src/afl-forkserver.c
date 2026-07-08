@@ -1398,8 +1398,16 @@ void afl_fsrv_kill(afl_forkserver_t *fsrv) {
 
   }
 
-  close(fsrv->fsrv_ctl_fd);
-  close(fsrv->fsrv_st_fd);
+  if (fsrv->fsrv_ctl_fd >= 0) {
+    close(fsrv->fsrv_ctl_fd);
+    fsrv->fsrv_ctl_fd = -1;
+  }
+
+  if (fsrv->fsrv_st_fd >= 0) {
+    close(fsrv->fsrv_st_fd);
+    fsrv->fsrv_st_fd = -1;
+  }
+
   fsrv->fsrv_pid = -1;
   fsrv->child_pid = -1;
 

@@ -3035,7 +3035,11 @@ stop_fuzzing:
   OKF("12\n");
   free(afl);                                                 /* not tracked */
   OKF("13\n");
-  argv_cpy_free(argv);
+  if (getenv("AFL_WASM_RUNTIME")) {
+    OKF("Skipping argv_cpy_free in Wasmtime prototype mode\n");
+  } else {
+    argv_cpy_free(argv);
+  }
   OKF("14\n");
   alloc_report();
 

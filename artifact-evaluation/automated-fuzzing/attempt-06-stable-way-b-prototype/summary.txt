@@ -1,0 +1,20 @@
+Attempt ID: attempt-06-stable-way-b-prototype
+
+Goal:
+Stabilize the Way B prototype. In this mode, the native target still uses the AFL++ forkserver, while the Wasm target is executed via normal Wasmtime invocation per input.
+
+Result:
+The fuzzer starts successfully, skips forkserver startup for diff_1, enters the fuzzing loop, and produces new corpus/diff items.
+
+Important output:
+- Skipping forkserver startup for diff_1 Wasmtime prototype
+- All set and ready to roll
+- new corpus items found
+- Skipping argv_cpy_free in Wasmtime prototype mode
+- We're done here. Have a nice day!
+
+Exit behavior:
+The previous "double free or corruption" crash is no longer observed. The process exits with code 124 only because it is terminated by the timeout wrapper.
+
+Interpretation:
+The Way B prototype is now stable enough for short AFL++ fuzzing runs and can be used to demonstrate automated Native-to-Wasm discrepancy detection without an instrumented WasmEdge forkserver.
