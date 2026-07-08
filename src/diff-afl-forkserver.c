@@ -905,12 +905,77 @@ u8 differential_compilers(afl_state_t *afl, void *mem, u32 len) {
   
   // md5 of following outputs
   for (int idx = 1; idx < afl->diff_num; idx++) {
-    lseek(afl->diff_fsrv[idx].out_fd, 0, SEEK_SET);
-    ret = afl_fsrv_run_target(&afl->diff_fsrv[idx], afl->fsrv.exec_tmout*100000, &afl->stop_soon);
-    if (ret == FSRV_RUN_TMOUT) {
-      FATAL("Diff forkserver run time out!");
-      return ret;
-    } 
+
+    if (idx == 1 && getenv("AFL_WASM_RUNTIME")) {
+
+      char input_path[PATH_MAX];
+      char output_path[PATH_MAX];
+      char stdout_path[PATH_MAX];
+      char stderr_path[PATH_MAX];
+      char cwd[PATH_MAX];
+      char cmd[PATH_MAX * 6];
+
+      snprintf(input_path, PATH_MAX, "%s/.cur_wasm_input", afl->tmp_dir);
+      snprintf(output_path, PATH_MAX, "%s/.cur_wasm_output", afl->tmp_dir);
+      snprintf(stdout_path, PATH_MAX, "%s/.cur_wasm_stdout", afl->tmp_dir);
+      snprintf(stderr_path, PATH_MAX, "%s/.cur_wasm_stderr", afl->tmp_dir);
+
+      s32 in_fd = open(input_path, O_WRONLY | O_CREAT | O_TRUNC, DEFAULT_PERMISSION);
+      if (in_fd < 0) { PFATAL("Unable to create Wasmtime input file"); }
+      ck_write(in_fd, mem, len, input_path);
+      close(in_fd);
+
+      if (!getcwd(cwd, sizeof(cwd))) { PFATAL("getcwd() failed"); }
+
+      unlink(output_path);
+      unlink(stdout_path);
+      unlink(stderr_path);
+
+      snprintf(cmd, sizeof(cmd),
+               "\"%s\" --dir \"%s\" \"%s/test.wasm\" \"%s\" \"%s\" > \"%s\" 2> \"%s\"",
+               getenv("AFL_WASM_RUNTIME"), cwd, cwd, input_path, output_path,
+               stdout_path, stderr_path);
+
+      int wasm_rc = system(cmd);
+
+      ftruncate(afl->diff_fsrv[idx].dev_stdout_fd, 0);
+      ftruncate(afl->diff_fsrv[idx].dev_stderr_fd, 0);
+      lseek(afl->diff_fsrv[idx].dev_stdout_fd, 0, SEEK_SET);
+      lseek(afl->diff_fsrv[idx].dev_stderr_fd, 0, SEEK_SET);
+
+      s32 out_fd = open(output_path, O_RDONLY);
+      if (out_fd >= 0) {
+        while ((bytes = read(out_fd, data, 1024)) > 0) {
+          ck_write(afl->diff_fsrv[idx].dev_stdout_fd, data, bytes, "wasm output copy");
+        }
+        close(out_fd);
+      }
+
+      s32 err_fd = open(stderr_path, O_RDONLY);
+      if (err_fd >= 0) {
+        while ((bytes = read(err_fd, data, 1024)) > 0) {
+          ck_write(afl->diff_fsrv[idx].dev_stderr_fd, data, bytes, "wasm stderr copy");
+        }
+        close(err_fd);
+      }
+
+      if (wasm_rc != 0) {
+        char rc_msg[128];
+        snprintf(rc_msg, sizeof(rc_msg), "Wasmtime exited with status %d\n", wasm_rc);
+        ck_write(afl->diff_fsrv[idx].dev_stderr_fd, rc_msg, strlen(rc_msg), "wasmtime rc");
+      }
+
+    } else {
+
+      lseek(afl->diff_fsrv[idx].out_fd, 0, SEEK_SET);
+      ret = afl_fsrv_run_target(&afl->diff_fsrv[idx], afl->fsrv.exec_tmout*100000, &afl->stop_soon);
+      if (ret == FSRV_RUN_TMOUT) {
+        FATAL("Diff forkserver run time out!");
+        return ret;
+      }
+
+    }
+
     lseek(afl->diff_fsrv[idx].dev_stdout_fd, 0, SEEK_SET);
     lseek(afl->diff_fsrv[idx].dev_stderr_fd, 0, SEEK_SET);
 

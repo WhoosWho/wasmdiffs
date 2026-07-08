@@ -1,0 +1,25 @@
+Attempt ID: attempt-05-successful-way-b-diff
+
+Goal:
+Validate the Way B prototype, where the native target still uses the AFL++ forkserver but the Wasm target is executed via normal Wasmtime invocation instead of a Wasm forkserver.
+
+Result:
+The fuzzer successfully entered the fuzzing loop and produced inputs under out/default/diffs. One saved input was manually replayed against the native binary and the Wasm binary.
+
+Saved input bytes:
+30 31 32 00 00 35 36 37
+
+Manual replay result:
+Native:
+- exit code: 0
+- output: I'm wasm one!
+
+Wasm:
+- exit code: 1
+- output: error!
+
+Observed discrepancy:
+The same input causes different observable behavior between the native binary and the Wasm binary.
+
+Interpretation:
+This confirms that the Way B prototype can bypass the missing Wasm forkserver by executing Wasmtime normally per input and can still discover Native-to-Wasm discrepancies.

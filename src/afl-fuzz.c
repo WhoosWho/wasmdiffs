@@ -2255,9 +2255,11 @@ int main(int argc, char **argv_orig, char **envp) {
         wasm_argv[0] = alloc_printf("%s", wavm_path);
         
 
-        // spins up the wasm forkserver
-        afl_fsrv_start_diff(&afl->diff_fsrv[i], i, wasm_argv, &afl->stop_soon,
-                          afl->afl_env.afl_debug_child);
+        // Wasmtime prototype mode:
+        // Normal Wasmtime does not implement the AFL++ forkserver handshake.
+        // Therefore, do not start diff_1 as a forkserver. It will be executed
+        // per input inside differential_compilers().
+        OKF("Skipping forkserver startup for diff_%u Wasmtime prototype", i);
       }
       
     }
