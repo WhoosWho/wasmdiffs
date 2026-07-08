@@ -338,3 +338,22 @@ Interpretation:
 Building the instrumented WasmEdge runtime according to the README is currently blocked because the required WasmDiff compiler wrappers are missing from the available repository checkout.
 
 As a result, the automated AFL++/WasmDiff workflow cannot yet be reproduced exactly as documented. The next step would be to locate the missing compiler wrapper scripts, obtain a complete artifact package, or reconstruct the wrappers based on the intended native/Wasm compilation workflow.
+
+## 15. Way B Prototype: Non-Forkserver Wasmtime Execution
+
+After reproducing the original forkserver failure, I implemented a prototype workaround called "Way B". The goal was to avoid treating the Wasm runtime as an AFL++ forkserver. Instead, the native target continues to use the AFL++ forkserver, while the Wasm target is executed normally through Wasmtime for each generated input.
+
+### Motivation
+
+The original WasmDiff workflow expects the Wasm runtime to participate in the AFL++ forkserver protocol. Normal Wasmtime does not provide this handshake. This caused the automated workflow to fail with:
+
+```text
+Fork server handshake failed
+
+This confirms that the prototype can discover observable Native-to-Wasm discrepancies without requiring an instrumented WasmEdge runtime.
+
+### Limitations
+
+This prototype is slower than the original intended design because Wasmtime is started normally for the Wasm side instead of using a persistent forkserver. It is currently tailored to the `compdiff_file_test` example and should be generalized before being used for larger projects.
+
+Nevertheless, it demonstrates a practical fallback strategy when the original instrumented Wasm runtime is unavailable.
