@@ -1,0 +1,25 @@
+PROGRAM_START
+ARG_INPUT_PATH trace-controlled-input.bin
+ARG_OUTPUT_PATH native_controlled.out
+ARG_TRACE_PATH native_controlled.trace
+OPEN_INPUT_OK
+OPEN_OUTPUT_OK
+FSCANF_RETURN index=0 value=1
+READ_BYTE index=0 value=0x30
+FSCANF_RETURN index=1 value=1
+READ_BYTE index=1 value=0x31
+FSCANF_RETURN index=2 value=1
+READ_BYTE index=2 value=0x32
+FSCANF_RETURN index=3 value=1
+READ_BYTE index=3 value=0x33
+FSCANF_RETURN index=4 value=1
+READ_BYTE index=4 value=0x34
+FSCANF_RETURN index=5 value=1
+READ_BYTE index=5 value=0x35
+FSCANF_RETURN index=6 value=1
+READ_BYTE index=6 value=0x36
+FSCANF_RETURN index=7 value=1
+READ_BYTE index=7 value=0x37
+BRANCH_ZERO_PREFIX
+WRITE_WASM_ONE
+EXIT_CODE 0

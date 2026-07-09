@@ -1,0 +1,33 @@
+Controlled trace divergence replay
+
+Goal:
+Demonstrate the extension idea on a controlled Native/Wasm discrepancy.
+
+Setup:
+- Native execution uses test_trace.c compiled as a native binary.
+- Wasm execution uses a controlled Wasm variant compiled from test_trace_wasm_variant.c.
+- Both executions receive the same input: 01234567.
+- Both executions produce trace logs with semantic source-level events.
+
+Final output comparison:
+Native output:
+I'm wasm one!
+
+Wasm output:
+I'm x86 one!
+
+Trace-based explanation:
+The trace comparison ignores path metadata and compares semantic events.
+
+The first divergent semantic event is event 21.
+
+Native event:
+WRITE_WASM_ONE
+
+Wasm event:
+WRITE_X86_ONE
+
+Interpretation:
+Both executions successfully open the input and output files, read the same eight input bytes, and take the same zero-prefix branch. The first observed semantic divergence occurs during the output/write step.
+
+This demonstrates the extension's purpose: instead of only reporting that the final outputs differ, the trace comparison identifies where the first meaningful divergence appears.

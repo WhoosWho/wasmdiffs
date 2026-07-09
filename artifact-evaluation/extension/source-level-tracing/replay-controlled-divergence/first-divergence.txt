@@ -1,0 +1,16 @@
+Trace comparison result
+=======================
+
+Native trace: native_controlled.trace
+Wasm trace:   wasm_controlled.trace
+
+Ignored prefixes: ARG_INPUT_PATH, ARG_OUTPUT_PATH, ARG_TRACE_PATH
+
+Result: semantic divergence found
+First divergent semantic event: 21
+
+Native event:
+  WRITE_WASM_ONE
+
+Wasm event:
+  WRITE_X86_ONE

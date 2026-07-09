@@ -1,0 +1,5 @@
+--- artifact-evaluation/extension/source-level-tracing/replay-controlled-divergence/native.out	2026-07-09 14:18:00.131665907 +0000
++++ artifact-evaluation/extension/source-level-tracing/replay-controlled-divergence/wasm.out	2026-07-09 14:18:00.148897367 +0000
+@@ -1 +1 @@
+-I'm wasm one!
++I'm x86 one!
